@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Opterra - Powerful Sales Solution v1.02</title>
+    <title>Opterra - Powerful Sales Solution v1.03</title>
     <link rel="icon" href="https://i.postimg.cc/g0Ymk2vy/opterra.png">
     <style>
         :root { --primary: #2563eb; --bg: #f1f5f9; --text: #334155; }
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; height: 100vh; }
         
-        /* Layout */
         header { background: #fff; padding: 10px 20px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; height: 60px; flex-shrink: 0; }
         header img { height: 30px; }
         nav { background: #fff; display: flex; gap: 5px; padding: 0 10px; border-bottom: 1px solid #e2e8f0; overflow-x: auto; flex-shrink: 0; }
@@ -21,20 +20,18 @@
         .page { display: none; }
         .page.active { display: block; }
         
-        /* Elements */
         .card { background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 1rem; }
         .grid-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
         input, select, textarea { width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 4px; }
-        button.save-btn { background: var(--primary); color: white; padding: 0.7rem 1.5rem; border: none; border-radius: 4px; cursor: pointer; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #e2e8f0; padding: 10px; text-align: left; }
-        .hidden { display: none; }
-        #splash { position: fixed; inset: 0; background: #fff; display: flex; align-items: center; justify-content: center; z-index: 9999; }
+        button { cursor: pointer; border: none; border-radius: 4px; padding: 0.6rem 1rem; }
+        .primary-btn { background: var(--primary); color: white; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; background: #fff; }
+        th, td { border: 1px solid #e2e8f0; padding: 12px; text-align: left; }
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; }
+        .modal-content { background: #fff; padding: 2rem; border-radius: 8px; width: 90%; max-width: 500px; }
     </style>
 </head>
 <body>
-
-    <div id="splash"><img src="https://i.postimg.cc/wMTdgfLg/opterrasplashscreen.gif"></div>
 
     <header>
         <img src="https://i.postimg.cc/g0Ymk2vy/opterra.png" alt="Logo">
@@ -46,52 +43,52 @@
         <button class="tab-btn" onclick="switchTab('opportunities', this)">Opportunities</button>
         <button class="tab-btn" onclick="switchTab('bookings', this)">Bookings</button>
         <button class="tab-btn" onclick="switchTab('projects', this)">Projects</button>
-        <button class="tab-btn" onclick="switchTab('lost', this)">Lost</button>
     </nav>
 
     <main>
-        <div id="dashboard" class="page active">
-            <h2>Dashboard</h2>
-            <div class="card">
-                <h3>Stats Overview</h3>
-                <p>Active Opportunities: <span id="count-active">0</span></p>
-            </div>
-        </div>
+        <div id="dashboard" class="page active"><h2>Dashboard</h2><div class="card">Active Leads: <span id="lead-count">0</span></div></div>
 
         <div id="opportunities" class="page">
-            <h2>Add New Opportunity</h2>
             <div class="card">
                 <form id="oppForm" class="grid-form">
                     <input type="text" id="name" placeholder="Client Name" required>
-                    <input type="tel" id="number" placeholder="Phone Number">
+                    <input type="tel" id="number" placeholder="Phone">
                     <input type="text" id="config" placeholder="Configuration">
                     <input type="text" id="carpet" placeholder="Carpet Area">
                     <input type="number" id="budget" placeholder="Budget">
+                    <input type="text" id="loc" placeholder="Location Resides">
                     <select id="source" onchange="toggleCP(this.value)">
                         <option value="direct">Direct</option>
                         <option value="channel">Channel Partner</option>
                     </select>
-                    <div id="cpFields" class="hidden" style="display:contents">
+                    <input type="text" id="sManager" placeholder="Sourcing Manager">
+                    <div id="cpFields" style="display:none; display:contents;">
                         <input type="text" id="cpName" placeholder="CP Name">
-                        <input type="text" id="cpFirm" placeholder="Firm Name">
+                        <input type="text" id="cpFirm" placeholder="CP Firm Name">
                         <input type="text" id="cpContact" placeholder="CP Contact">
                     </div>
-                    <button type="button" class="save-btn" onclick="saveOpportunity()">Save Opportunity</button>
+                    <button type="button" class="primary-btn" onclick="addLead()">Add Opportunity</button>
                 </form>
             </div>
-            <table id="oppTable"><thead><tr><th>Name</th><th>Phone</th><th>Status</th></tr></thead><tbody></tbody></table>
+            <table id="oppTable"><thead><tr><th>Name</th><th>Action</th></tr></thead><tbody></tbody></table>
         </div>
-
-        <div id="bookings" class="page"><h2>Bookings</h2></div>
-        <div id="projects" class="page"><h2>Projects</h2><p>Coming Soon...</p></div>
-        <div id="lost" class="page"><h2>Lost</h2></div>
     </main>
 
-    <script>
-        // Splash Screen
-        window.addEventListener('load', () => setTimeout(() => document.getElementById('splash').style.display = 'none', Math.random() * 200 + 500));
+    <!-- Modal for Lead Update -->
+    <div id="leadModal" class="modal">
+        <div class="modal-content">
+            <h3>Update Lead</h3>
+            <textarea id="updRemark" placeholder="New Remark"></textarea>
+            <input type="date" id="updDate">
+            <button class="primary-btn" onclick="saveUpdate()">Update & Save</button>
+            <button onclick="closeModal()">Close</button>
+        </div>
+    </div>
 
-        // Tab Navigation
+    <script>
+        let leads = JSON.parse(localStorage.getItem('leads') || '[]');
+        let currentIdx = null;
+
         function switchTab(id, btn) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -99,36 +96,42 @@
             btn.classList.add('active');
         }
 
-        // Logic
         function toggleCP(val) { document.getElementById('cpFields').style.display = (val === 'channel') ? 'contents' : 'none'; }
 
-        function saveOpportunity() {
-            const data = {
+        function addLead() {
+            const lead = {
                 name: document.getElementById('name').value,
-                phone: document.getElementById('number').value,
-                status: 'Active'
+                remark: '',
+                followUp: ''
             };
-            let list = JSON.parse(localStorage.getItem('opps') || '[]');
-            list.push(data);
-            localStorage.setItem('opps', JSON.stringify(list));
-            renderOpps();
-            alert('Opportunity Saved!');
+            leads.push(lead);
+            localStorage.setItem('leads', JSON.stringify(leads));
+            renderTable();
         }
 
-        function renderOpps() {
-            const list = JSON.parse(localStorage.getItem('opps') || '[]');
+        function renderTable() {
             const tbody = document.querySelector('#oppTable tbody');
-            tbody.innerHTML = list.map(o => `<tr><td>${o.name}</td><td>${o.phone}</td><td>${o.status}</td></tr>`).join('');
-            document.getElementById('count-active').innerText = list.length;
+            tbody.innerHTML = leads.map((l, i) => `<tr><td>${l.name}</td><td><button onclick="openModal(${i})">View Lead</button></td></tr>`).join('');
+            document.getElementById('lead-count').innerText = leads.length;
         }
 
-        function updateTime() {
+        function openModal(i) { currentIdx = i; document.getElementById('leadModal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('leadModal').style.display = 'none'; }
+
+        function saveUpdate() {
+            leads[currentIdx].remark = document.getElementById('updRemark').value;
+            leads[currentIdx].followUp = document.getElementById('updDate').value;
+            localStorage.setItem('leads', JSON.stringify(leads));
+            closeModal();
+            alert('Updated!');
+        }
+
+        setInterval(() => {
             const now = new Date();
             document.getElementById('live-time').innerText = now.toLocaleDateString('en-GB') + ' ' + now.toLocaleTimeString('en-US');
-        }
+        }, 1000);
 
-        setInterval(updateTime, 1000);
-        renderOpps();
+        renderTable();
     </script>
 </body>
 </html>
